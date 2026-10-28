@@ -2,22 +2,31 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import re
 import math
+import joblib
+import pandas as pd
+import os
 
 app = FastAPI()
+
+# Load trained Random Forest model
+MODEL_PATH = "phishing_model.pkl"
+if os.path.exists(MODEL_PATH):
+    model = joblib.load(MODEL_PATH)
+    print("🤖 Scikit-Learn Model loaded successfully!")
+else:
+    model = None
+    print("⚠️ Model file not found. Run train_model.py first.")
 
 class ScanRequest(BaseModel):
     url: str
 
 def calculate_entropy(text: str) -> float:
-    """Calculates randomness (entropy) of character distribution in the URL."""
     if not text:
         return 0.0
     prob = [float(text.count(c)) / len(text) for c in set(text)]
     return -sum([p * math.log2(p) for p in prob])
 
 def extract_features(url: str):
-    """Extracts 6 core numerical features used by ML classifiers."""
-    url_lower = url.lower()
     return {
         "url_length": len(url),
         "has_at_symbol": 1 if "@" in url else 0,
@@ -29,23 +38,23 @@ def extract_features(url: str):
 
 @app.post("/predict")
 def predict_phishing(data: ScanRequest):
-    features = extract_features(data.url)
+    features_dict = extract_features(data.url)
     
-    # Heuristic scoring simulating a trained Random Forest classifier
-    score = 0
-    if features["url_length"] > 54: score += 20
-    if features["has_at_symbol"]: score += 30
-    if features["has_ip"]: score += 35
-    if features["hyphen_count"] > 2: score += 15
-    if features["subdomain_count"] >= 3: score += 20
-    if features["entropy"] > 4.2: score += 15
+    if model:
+        # Convert dictionary to DataFrame matching training feature columns
+        df_features = pd.DataFrame([features_dict])
+        
+        # Get class probability (% likelihood of being phishing / Label 1)
+        phishing_prob = model.predict_proba(df_features)[0][1]
+        final_score = round(phishing_prob * 100, 2)
+    else:
+        final_score = 50.0
 
-    final_score = min(score, 99.9)
-    status = "Malicious" if final_score >= 50 else ("Suspicious" if final_score >= 25 else "Safe")
+    status = "Malicious" if final_score >= 60 else ("Suspicious" if final_score >= 35 else "Safe")
 
     return {
         "url": data.url,
         "risk_score": final_score,
         "status": status,
-        "features": features
+        "features": features_dict
     }
