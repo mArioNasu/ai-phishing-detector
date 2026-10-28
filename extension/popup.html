@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #818cf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .url-box {
+      font-size: 11px;
+      color: #94a3b8;
+      word-break: break-all;
+      background: #1e293b;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background-color: #4338ca; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #result {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .safe { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; }
+    .suspicious { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; }
+    .malicious { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .badge-safe { background: #10b981; color: white; }
+    .badge-suspicious { background: #f59e0b; color: white; }
+    .badge-malicious { background: #ef4444; color: white; }
+  </style>
+</head>
+<body>
+  <h3>🛡️ Phishing Detector</h3>
+  <div id="activeUrl" class="url-box">Fetching active URL...</div>
+  <button id="scanBtn">Scan Tab URL</button>
+
+  <div id="result">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span id="statusBadge" class="badge">Safe</span>
+      <span id="riskScore" style="font-weight: bold; font-size: 18px;">0%</span>
+    </div>
+    <p style="font-size: 11px; color: #cbd5e1; margin-top: 8px; margin-bottom: 0;">Machine Learning Risk Assessment Complete.</p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
